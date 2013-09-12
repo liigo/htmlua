@@ -7,15 +7,17 @@ extern "C"{
 	#include<lauxlib.h>
 }
 
+static void create_node(lua_State* L, liigo::HtmlNode* node);
 
 class LuaHtmlParser : public liigo::HtmlParser {
 private:
 	lua_State* L;
-	int refOnIdentifyHtmlTag;
+	int refOnIdentifyHtmlTag, refOnNodeReady;
 public:
-	LuaHtmlParser(lua_State* L_, int refOnIdentifyHtmlTag_) { this->L = L_; refOnIdentifyHtmlTag = refOnIdentifyHtmlTag_; }
+	LuaHtmlParser(lua_State* L_, int refOnIdentifyHtmlTag_, int refOnNodeReady_) { this->L = L_; refOnIdentifyHtmlTag = refOnIdentifyHtmlTag_; refOnNodeReady = refOnNodeReady_; }
 	virtual ~LuaHtmlParser() {}
 	int get_refOnIdentifyHtmlTag() { return refOnIdentifyHtmlTag; }
+	int get_refOnNodeReady() { return refOnNodeReady; }
 
 public:
 	//允许子类覆盖, 以便识别更多标签(提高解析质量), 或者识别更少标签(提高解析速度)
@@ -42,8 +44,17 @@ public:
 	}
 
 	//允许子类覆盖, 在某节点解析完成后被调用, 如果返回false则立刻停止解析HTML
-	virtual bool onNodeReady(liigo::HtmlNode* pNode) { return true; }
-
+	virtual bool onNodeReady(liigo::HtmlNode* pNode) {
+		if(refOnNodeReady != LUA_NOREF && refOnNodeReady != LUA_REFNIL) {
+			lua_rawgeti(L, LUA_REGISTRYINDEX, refOnNodeReady);
+			if(lua_isfunction(L, -1)) {
+				create_node(L, pNode);
+				lua_call(L, 1, 1);
+				return lua_toboolean(L, -1) == 1;
+			}
+		}
+		return true;
+	}
 };
 
 
@@ -134,7 +145,7 @@ static int parser_ipairs(lua_State* L) {
 	if(lua_gettop(L) != 1 || !lua_istable(L, -1)) {
 		report_lua_error(L, "ipairs() requires a parser as the only parameter");
 	}
-	lua_pushcclosure(L, parser_nextnode, 0); // lua5.2: lua_pushcfuntion(L, parser_nextnode);
+	lua_pushcfunction(L, parser_nextnode);
 	lua_insert(L, -2);
 	lua_pushinteger(L, 0);
 	return 3;
@@ -199,7 +210,7 @@ static int node_pairs(lua_State* L) {
 	}
 	lua_pushinteger(L, 0);
 	lua_rawseti(L, -2, 1); //node[1] = 0, store the iterate index
-	lua_pushcclosure(L, node_nextattr, 0); // lua5.2: lua_pushcfuntion(L, parser_nextnode);
+	lua_pushcfunction(L, node_nextattr);
 	lua_insert(L, -2);
 	lua_pushnil(L);
 	return 3;
@@ -259,8 +270,7 @@ static liigo::HtmlNode* getnode(lua_State* L) {
 	return getparsernode(parser, nodeindex);
 }
 
-// returns node (table) at nodeindex, or nil if no such node
-// arg: parser (self), nodeindex (int)
+// create node table, and push to stack top
 // node's property:
 //   type
 //   text
@@ -273,11 +283,10 @@ static liigo::HtmlNode* getnode(lua_State* L) {
 //   attr("name")
 //   pairs(void)
 //   parseattr(void)
-static int parser_node(lua_State* L) {
-	liigo::HtmlNode* node = getnode(L);
+static void create_node(lua_State* L, liigo::HtmlNode* node) {
 	if(node == NULL) {
 		lua_pushnil(L);
-		return 1;
+		return;
 	}
 
 	LuaFunc funcs[] = {
@@ -312,13 +321,18 @@ static int parser_node(lua_State* L) {
 
 	lua_pushlightuserdata(L, node);
 	lua_rawseti(L, -2, 0); // self[0] = node
+}
 
+// returns node (table) at nodeindex, or nil if no such node
+// arg: parser (self), nodeindex (int)
+static int parser_node(lua_State* L) {
+	create_node(L, getnode(L));
 	return 1;
 }
 
 
 // returns a new 'parser' (table value)
-// arg: optional function 'onIdentifyHtmlTag'
+// arg: optional function 'onIdentifyHtmlTag', optional function 'onNodeReady'
 //   tagtype onIdentifyHtmlTag(tagname, nodetype)
 //   int onIdentifyHtmlTag(string, int)
 static int html_newparser(lua_State* L) {
@@ -330,11 +344,16 @@ static int html_newparser(lua_State* L) {
 		{ NULL, NULL }
 	};
 
+	int refOnNodeReady = LUA_NOREF;
+	if(lua_gettop(L) > 1 && lua_isfunction(L, -1)) {
+		refOnNodeReady = luaL_ref(L, LUA_REGISTRYINDEX);
+	}
 	int refOnIdentifyHtmlTag = LUA_NOREF;
 	if(lua_gettop(L) > 0 && (lua_isfunction(L,-1) || lua_isstring(L,-1))) {
 		refOnIdentifyHtmlTag = luaL_ref(L, LUA_REGISTRYINDEX);
 	}
-	liigo::HtmlParser* parser = new LuaHtmlParser(L, refOnIdentifyHtmlTag);
+
+	liigo::HtmlParser* parser = new LuaHtmlParser(L, refOnIdentifyHtmlTag, refOnNodeReady);
 	create_lua_funcs_table(L, funcs, NULL);
 	lua_pushlightuserdata(L, parser);
 	lua_rawseti(L, -2, 0); // self[0] = parser; @see getparser()

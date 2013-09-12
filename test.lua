@@ -46,8 +46,13 @@ local htmltag = {
 }
 
 local function identifyHtmlTag(tagname, nodetype)
-	--print("identifyHtmlTag()", tagname, nodetype)
+	--print("identifyHtmlTag:", tagname, nodetype)
 	return htmltag[string.upper(tagname)] or htmltag.UNKNOWN
+end
+
+local function onNodeReady(node)
+	print("onnodeready:", node.tagname, node.text)
+	return (node.tagname ~= "break")
 end
 
 local function testNodes()
@@ -100,6 +105,15 @@ local function testNodeAttributes()
 	html.deleteparser(parser)
 end
 
+local function testParserCallbacks()
+	print("------Test Callbacks------")
+	local parser = html.newparser(identifyHtmlTag,onNodeReady)
+	parser:parse("<1><2><3>...<5 x=0><break><6><7>")
+	html.deleteparser(parser)
+end
+
 testNodes()
 testNodeAttributes()
+testParserCallbacks()
+
 print("test html over")
