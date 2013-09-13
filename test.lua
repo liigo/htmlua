@@ -73,7 +73,7 @@ local function onParseAttr(node)
 end
 
 local function onNodeReady(node)
-	print("onnodeready:", node.tagname, node.text)
+	print("onNodeReady:", node.tagname, node.text)
 	return (node.tagname ~= "break")
 end
 

@@ -452,7 +452,7 @@ static void define_htmlnode(lua_State* L) {
 		{ "START_TAG", 1 }, // 开始标签，如 <a href=...>
 		{ "END_TAG",   2 }, // 结束标签，如 </a>
 		{ "CONTENT",   3 }, // 普通文本
-		{ "REMARKS",   4 }, // 注释文本，<!-- ... ->
+		{ "REMARKS",   4 }, // 注释文本，<!-- ... -->
 		{ "UNKNOWN",   5 }, // 未知节点
 		{ "_USER_",   10 }, // 用户定义的其他标签类型值应大于_USER_，以确保不与上面定义的常量值重复
 	};
