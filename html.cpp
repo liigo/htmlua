@@ -1,6 +1,7 @@
 #include "html.h"
 #include "HtmlParser.h"
 #include <stdlib.h>
+#include <string.h>
 
 extern "C"{
 	#include <lua.h>
@@ -12,11 +13,11 @@ static void create_node(lua_State* L, liigo::HtmlNode* node);
 class LuaHtmlParser : public liigo::HtmlParser {
 private:
 	lua_State* L;
-	int refOnIdentifyHtmlTag, refOnNodeReady;
+	int refOnParseAttr, refOnNodeReady;
 public:
-	LuaHtmlParser(lua_State* L_, int refOnIdentifyHtmlTag_, int refOnNodeReady_) { this->L = L_; refOnIdentifyHtmlTag = refOnIdentifyHtmlTag_; refOnNodeReady = refOnNodeReady_; }
+	LuaHtmlParser(lua_State* L_, int refOnParseAttr_, int refOnNodeReady_) { this->L = L_; refOnParseAttr = refOnParseAttr_; refOnNodeReady = refOnNodeReady_; }
 	virtual ~LuaHtmlParser() {}
-	int get_refOnIdentifyHtmlTag() { return refOnIdentifyHtmlTag; }
+	int get_refOnParseAttr() { return refOnParseAttr; }
 	int get_refOnNodeReady() { return refOnNodeReady; }
 
 public:
@@ -24,22 +25,35 @@ public:
 	//默认仅识别涉及HTML基本结构和信息的有限几个开始标签: A,IMG,META,BODY,TITLE,FRAME,IFRAME
 	//onIdentifyHtmlTag()先于onParseAttributes()被调用
 	virtual liigo::HtmlTagType onIdentifyHtmlTag(const char* szTagName, liigo::HtmlNodeType nodeType) {
-		if(refOnIdentifyHtmlTag != LUA_NOREF && refOnIdentifyHtmlTag != LUA_REFNIL) {
-			lua_rawgeti(L, LUA_REGISTRYINDEX, refOnIdentifyHtmlTag);
-			if(lua_isfunction(L, -1)) {
-				lua_pushstring(L, szTagName);
-				lua_pushinteger(L, (int)nodeType);
-				lua_call(L, 2, 1);
-				return (liigo::HtmlTagType)lua_tointeger(L, -1);
-			}
+		//因为LUA里面的table是哈希表，根据标签名称文本检索得到对应的标签类型，非常快捷，并且多识别还是少识别一些标签并无速度上的明显差别，
+		//所以这个地方没有必要执行用户的回调函数了，直接自动识别所有HTML标签。
+		int len = strlen(szTagName) + 1;
+		char tagNameUpper[32]; //标签名称全大写，32空间足够
+		for(int i = 0; i < len; i++) {
+			tagNameUpper[i] = toupper(szTagName[i]);
 		}
-		return HtmlParser::onIdentifyHtmlTag(szTagName, nodeType);
+		lua_getglobal(L, "htmltag");
+		lua_getfield(L, -1, tagNameUpper);
+		liigo::HtmlTagType tagtype = lua_isnil(L, -1) ? liigo::TAG_UNKNOWN : (liigo::HtmlTagType)lua_tointeger(L, -1);
+		lua_pop(L, 2); // pop htmltag[szTagName] and htmltag
+		return tagtype;
 	}
 
 	//允许子类覆盖, 以便更好的解析节点属性, 或者部分解析甚至干脆不解析节点属性(提高解析速度)
 	//可以根据标签名称(pNode->tagName)或标签类型(pNode->tagType)判断是否需要解析属性（parseAttributes()）
 	//默认仅解析"已识别出标签类型"的标签属性（即pNode->tagType != TAG_UNKNOWN）
 	virtual void onParseAttributes(liigo::HtmlNode* pNode) {
+		if(refOnParseAttr != LUA_NOREF && refOnParseAttr != LUA_REFNIL) {
+			lua_rawgeti(L, LUA_REGISTRYINDEX, refOnParseAttr);
+			if(lua_isfunction(L, -1)) {
+				create_node(L, pNode);
+				lua_call(L, 1, 1); // 参数为node, 返回true表示需要解析其属性, 否则不解析
+				if(lua_toboolean(L, -1) == 1)
+					liigo::HtmlParser::parseAttributes(pNode);
+				lua_pop(L, 1);
+				return;
+			}
+		}
 		HtmlParser::onParseAttributes(pNode);
 	}
 
@@ -49,8 +63,10 @@ public:
 			lua_rawgeti(L, LUA_REGISTRYINDEX, refOnNodeReady);
 			if(lua_isfunction(L, -1)) {
 				create_node(L, pNode);
-				lua_call(L, 1, 1);
-				return lua_toboolean(L, -1) == 1;
+				lua_call(L, 1, 1); // 参数为node, 返回true表示需要继续解析后续节点，否则终止解析
+				bool r = lua_toboolean(L, -1) == 1;
+				lua_pop(L, 1);
+				return r;
 			}
 		}
 		return true;
@@ -332,9 +348,9 @@ static int parser_node(lua_State* L) {
 
 
 // returns a new 'parser' (table value)
-// arg: optional function 'onIdentifyHtmlTag', optional function 'onNodeReady'
-//   tagtype onIdentifyHtmlTag(tagname, nodetype)
-//   int onIdentifyHtmlTag(string, int)
+// arg: optional function 'onParseAttr', optional function 'onNodeReady'
+//   bool onParseAttr(node)
+//   bool onNodeReady(node)
 static int html_newparser(lua_State* L) {
 	LuaFunc funcs[] = {
 		{ "parse", parser_parse },
@@ -348,12 +364,12 @@ static int html_newparser(lua_State* L) {
 	if(lua_gettop(L) > 1 && lua_isfunction(L, -1)) {
 		refOnNodeReady = luaL_ref(L, LUA_REGISTRYINDEX);
 	}
-	int refOnIdentifyHtmlTag = LUA_NOREF;
-	if(lua_gettop(L) > 0 && (lua_isfunction(L,-1) || lua_isstring(L,-1))) {
-		refOnIdentifyHtmlTag = luaL_ref(L, LUA_REGISTRYINDEX);
+	int refOnParseAttr = LUA_NOREF;
+	if(lua_gettop(L) > 0 && (lua_isfunction(L,-1))) {
+		refOnParseAttr = luaL_ref(L, LUA_REGISTRYINDEX);
 	}
 
-	liigo::HtmlParser* parser = new LuaHtmlParser(L, refOnIdentifyHtmlTag, refOnNodeReady);
+	liigo::HtmlParser* parser = new LuaHtmlParser(L, refOnParseAttr, refOnNodeReady);
 	create_lua_funcs_table(L, funcs, NULL);
 	lua_pushlightuserdata(L, parser);
 	lua_rawseti(L, -2, 0); // self[0] = parser; @see getparser()
@@ -364,7 +380,7 @@ static int html_newparser(lua_State* L) {
 static int html_deleteparser(lua_State* L) {
 	LuaHtmlParser* parser = (LuaHtmlParser*) getparser(L);
 	if(parser) {
-		luaL_unref(L, LUA_REGISTRYINDEX, parser->get_refOnIdentifyHtmlTag());
+		luaL_unref(L, LUA_REGISTRYINDEX, parser->get_refOnParseAttr());
 		delete parser;
 		lua_pushnil(L);
 		lua_rawseti(L, -2, 0); // self[0] = NULL
@@ -378,6 +394,9 @@ static int html__gc(lua_State* L) {
 	html_deleteparser(L);
 	return 0;
 }
+
+static void define_htmlnode(lua_State* L);
+static void define_htmltag(lua_State* L);
 
 extern "C"
 int luaopen_html(lua_State* L) {
@@ -400,7 +419,171 @@ int luaopen_html(lua_State* L) {
 	lua_pushnil(L);
 	html_newparser(L);
 	lua_setfield(L, html, "parser"); // html.parser = new parser
-	lua_settop(L, html);
 
+	// define global consts
+	define_htmlnode(L);
+	define_htmltag(L);
+
+	lua_settop(L, html);
 	return 1;
+}
+
+struct TableFieldStrInt {
+	const char* name;
+	int value;
+};
+
+// define global table
+// no arg, no return
+static void define_global_table_strint(lua_State* L, const char* name, const TableFieldStrInt* fields, int count) {
+	lua_createtable(L, 0, count);
+	for(int i = 0; i < count; i++, fields++) {
+		lua_pushinteger(L, fields->value);
+		lua_setfield(L, -2, fields->name);
+	};
+	lua_setglobal(L, name);
+}
+
+
+// define global table htmlnod. usage: htmlnode.START_TAG
+// no arg, no return
+static void define_htmlnode(lua_State* L) {
+	TableFieldStrInt fields[] = {
+		{ "START_TAG", 1 }, // 开始标签，如 <a href=...>
+		{ "END_TAG",   2 }, // 结束标签，如 </a>
+		{ "CONTENT",   3 }, // 普通文本
+		{ "REMARKS",   4 }, // 注释文本，<!-- ... ->
+		{ "UNKNOWN",   5 }, // 未知节点
+		{ "_USER_",   10 }, // 用户定义的其他标签类型值应大于_USER_，以确保不与上面定义的常量值重复
+	};
+	define_global_table_strint(L, "htmlnode", fields, sizeof(fields) / sizeof(fields[0]));
+}
+
+// define global table htmltag. usage: htmltag.DIV
+// no arg, no return
+static void define_htmltag(lua_State* L) {
+	TableFieldStrInt fields[] = {
+		{ "UNKNOWN",	0 }, // 表示未经识别的标签类型，参见HtmlParser.onIdentifyHtmlTag()
+		{ "SCRIPT",		1 }, // 出于解析需要必须识别<script>,<style>和<textarea>，内部特别处理
+		{ "STYLE",		2 }, 
+		{ "TEXTAREA",	3 }, 
+		{ "A",			101 }, // 以下按标签字母顺序排列, 来源：http://www.w3.org/TR/html4/index/elements.html (HTML4)
+		{ "ABBR",		102 }, //  and http://www.w3.org/TR/html5/section-index.html#elements-1 (HTML5)
+		{ "ACRONYM",	103 },
+		{ "ADDRESS",	104 },
+		{ "APPLET",		105 },
+		{ "AREA",		106 },
+		{ "ARTICLE",	107 },
+		{ "ASIDE",		108 },
+		{ "AUDIO",		109 },
+		{ "B",			110 },
+		{ "BASE",		111 },
+		{ "BASEFONT",	112 },
+		{ "BDI",		113 },
+		{ "BDO",		114 },
+		{ "BIG",		115 },
+		{ "BLOCKQUOTE",	116 },
+		{ "BODY",		117 },
+		{ "BR",			118 },
+		{ "BUTTON",		119 },
+		{ "CAPTION",	120 },
+		{ "CENTER",		121 },
+		{ "CITE",		122 },
+		{ "CODE",		123 },
+		{ "COL",		124 },
+		{ "COLGROUP",	125 },
+		{ "COMMAND",	126 },
+		{ "DATALIST",	127 },
+		{ "DD",			128 },
+		{ "DEL",		129 },
+		{ "DETAILS",	130 },
+		{ "DFN",		131 },
+		{ "DIR",		132 },
+		{ "DIV",		133 },
+		{ "DL",			134 },
+		{ "DT",			135 },
+		{ "EM",			136 },
+		{ "EMBED",		137 },
+		{ "FIELDSET",	138 },
+		{ "FIGCAPTION",	139 },
+		{ "FIGURE",		140 },
+		{ "FONT",		141 },
+		{ "FOOTER",		142 },
+		{ "FORM",		143 },
+		{ "FRAME",		144 },
+		{ "FRAMESET",	145 },
+		{ "H1",			146 },
+		{ "H2",			147 },
+		{ "H3",			148 },
+		{ "H4",			149 },
+		{ "H5",			150 },
+		{ "H6",			151 },
+		{ "HEAD",		152 },
+		{ "HEADER",		153 },
+		{ "HGROUP",		154 },
+		{ "HR",			155 },
+		{ "HTML",		156 },
+		{ "I",			157 },
+		{ "IFRAME",		158 },
+		{ "IMG",		159 },
+		{ "INPUT",		160 },
+		{ "INS",		161 },
+		{ "ISINDEX",	162 },
+		{ "KBD",		163 },
+		{ "KEYGEN",		164 },
+		{ "LABEL",		165 },
+		{ "LEGEND",		166 },
+		{ "LI",			167 },
+		{ "LINK",		168 },
+		{ "MAP",		169 },
+		{ "MARK",		170 },
+		{ "MENU",		171 },
+		{ "META",		172 },
+		{ "METER",		173 },
+		{ "NAV",		174 },
+		{ "NOFRAMES",	175 },
+		{ "NOSCRIPT",	176 },
+		{ "OBJECT",		177 },
+		{ "OL",			178 },
+		{ "OPTGROUP",	179 },
+		{ "OPTION",		180 },
+		{ "P",			181 },
+		{ "PARAM",		182 },
+		{ "PRE",		183 },
+		{ "PROGRESS",	184 },
+		{ "Q",			185 },
+		{ "RP",			186 },
+		{ "RT",			187 },
+		{ "RUBY",		188 },
+		{ "S",			189 },
+		{ "SAMP",		190 },
+		{ "SECTION",	191 },
+		{ "SELECT",		192 },
+		{ "SMALL",		193 },
+		{ "SOURCE",		194 },
+		{ "SPAN",		195 },
+		{ "STRIKE",		196 },
+		{ "STRONG",		197 },
+		{ "SUB",		198 },
+		{ "SUMMARY",	199 },
+		{ "SUP",		200 },
+		{ "TABLE",		201 },
+		{ "TBODY",		202 },
+		{ "TD",			203 },
+		{ "TFOOT",		204 },
+		{ "TH",			205 },
+		{ "THEAD",		206 },
+		{ "TIME",		207 },
+		{ "TITLE",		208 },
+		{ "TR",			209 },
+		{ "TRACK",		210 },
+		{ "TT",			211 },
+		{ "U",			212 },
+		{ "UL",			213 },
+		{ "VAR",		214 },
+		{ "VIDEO",		215 },
+		{ "WBR",		216 },
+		{ "_USER_", 300 }, // 用户定义的其他标签类型值应大于_USER_，以确保不与上面定义的常量值重复
+	};
+	define_global_table_strint(L, "htmltag", fields, sizeof(fields) / sizeof(fields[0]));
 }
