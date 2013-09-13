@@ -127,13 +127,13 @@ static liigo::HtmlParser* getparser(lua_State* L) {
 }
 
 // parse html text
-// arg: parser (self), html (string), parseAttributes (bool)
+// arg: parser (self), html (string), parseAttr (bool, default true)
 // no returns, use parser:node(index) to get the parsed nodes.
 static int parser_parse(lua_State* L) {
 	const char* html = lua_tostring(L, 2);
-	int parseAttributes = lua_toboolean(L, 3);
+	bool parseAttr = (lua_gettop(L) >= 3) ? (lua_toboolean(L, 3)==1) : true; //如果省略参数parseAttr, 默认为ture
 	liigo::HtmlParser* parser = getparser(L);
-	parser->parseHtml(html, parseAttributes == 1);
+	parser->parseHtml(html, parseAttr);
 	return 0;
 }
 

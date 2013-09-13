@@ -1,7 +1,7 @@
 local html = require "html"
 
 local parser = html.newparser()
-parser:parse("<html><body bg=red id=liigo>xxx<p x=123>...", true)
+parser:parse("<html><body bg=red id=liigo>xxx<p x=123>...")
 
 for index,node in parser:ipairs() do
 	print(index, node.tagname, node.text)
@@ -42,7 +42,7 @@ end
 local function testNodeAttributes()
 	print("------Test attributes------")
 	local parser = html.newparser()
-	parser:parse("<a href='liigo.com' color=red checked>111</a>", true) -- parameter parseAttributes: true
+	parser:parse("<a href='liigo.com' color=red checked>111</a>")
 	assert(parser:nodecount() == 3)
 	local node1 = parser:node(1)
 	assert(node1 ~= nil)
@@ -80,7 +80,7 @@ end
 local function testParserCallbacks()
 	print("------Test Callbacks------")
 	local parser = html.newparser(onParseAttr, onNodeReady)
-	parser:parse("<1 a=b><2 x=y><3>...<5 x=0><break><7><8>", true)
+	parser:parse("<1 a=b><2 x=y><3>...<5 x=0><break><7><8>")
 	assert(parser:node(1).attrcount == 0) --未解析其属性,参见onParseAttr()
 	assert(parser:node(2).attrcount == 1)
 	assert(parser:node(5).attrcount == 0)
