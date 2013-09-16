@@ -417,6 +417,7 @@ int luaopen_html(lua_State* L) {
 
 	// auto create a parser, ready to use
 	lua_pushnil(L);
+	lua_pushnil(L);
 	html_newparser(L);
 	lua_setfield(L, html, "parser"); // html.parser = new parser
 
@@ -583,7 +584,7 @@ static void define_htmltag(lua_State* L) {
 		{ "VAR",		214 },
 		{ "VIDEO",		215 },
 		{ "WBR",		216 },
-		{ "_USER_", 300 }, // 用户定义的其他标签类型值应大于_USER_，以确保不与上面定义的常量值重复
+		{ "_USER_",		300 }, // 用户定义的其他标签类型值应大于_USER_，以确保不与上面定义的常量值重复
 	};
 	define_global_table_strint(L, "htmltag", fields, sizeof(fields) / sizeof(fields[0]));
 }
