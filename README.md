@@ -1,5 +1,5 @@
-html
-====
+htmlua
+======
 
 Lua's C module for parsing html text, wrapper of liigo::HtmlParser
 
@@ -14,9 +14,9 @@ LUA的HTML解析库，C模块，封装自C++的库 [liigo::HtmlParser](https://github.com/lii
 
 本文第四节将专门介绍节点类型和标签类型。更多信息请参考[我CSDN博客上的文章](http://blog.csdn.net/liigo/article/details/6153829)。
 
-###一、加载html库，创建parser解析器对象
+###一、加载htmlua库，创建parser解析器对象
 
-	local html = require "html"
+	local html = require "htmlua"
 
 该html对象（可自由命名）有以下两个函数：
 
@@ -27,7 +27,7 @@ LUA的HTML解析库，C模块，封装自C++的库 [liigo::HtmlParser](https://github.com/lii
 
 ###二、parser解析器对象，解析HTML文本
 
-parser解析器有以下方法（需首先传入parser自身）：
+parser解析器有以下方法（需首先传入parser自身作为第一个参数）：
 
 	parser:parse(html,[parseAttr]) -- 解析HTML文本，参数1是HTML文本，参数2指定是否解析节点属性（默认为true），无返回值
 	parser:nodecount() -- 返回解析后的节点个数
@@ -53,7 +53,7 @@ node对象有以下成员：
 	node.iscdata   -- 是否CDATA区块（bool）
 	node.isselfclosing -- 是否自结束标签（bool）（例如<br/>为自结束标签）
 
-node对象有以下方法（需首先传入parser自身）：
+node对象有以下方法（需首先传入node自身作为第一个参数）：
 
 	node:attr(index/name) -- 取指定属性值。如果参数是属性名(string)，返回属性值(string)；如果参数是属性索引(>=1,<=attrcount)，返回属性名(string)和属性值(string)；如果参数指定的属性不存在，返回两个nil。
 	node:pairs()     -- 用于支持for循环遍历属性，如 for name,value in node:pairs() do ...
@@ -111,8 +111,8 @@ node对象有以下方法（需首先传入parser自身）：
 
 函数 html.newparser([fnOnParseAttr],[fnOnNodeReady]) 有两个可省略的参数，可接收两个函数作为回调函数，它们在解析过程中被多次调用，其原型如下：
 
-	function fnOnParseAttr (node) bool
-	function fnOnNodeReady (node) bool
+	function fnOnParseAttr(node) bool
+	function fnOnNodeReady(node) bool
 
 回调函数 fnOnParseAttr 在解析到开始标签且需要解析属性时被调用。参数是当前节点对象node，返回值类型是bool。返回true表示需要解析属性，返回false表示不需要。如果此参数被省略或为nil，等价于返回true。parser:parse()参数parseAttr为false的情况下不会调用此回调函数。
 

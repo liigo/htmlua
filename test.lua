@@ -1,4 +1,4 @@
-local html = require "html"
+local html = require "htmlua"
 
 local parser = html.newparser()
 parser:parse("<html><body bg=red id=liigo>xxx<p x=123>...")
@@ -92,4 +92,4 @@ testNodes()
 testNodeAttributes()
 testParserCallbacks()
 
-print("test html over")
+print("test htmlua over")

@@ -1,0 +1,4 @@
+LIBRARY  htmlua
+
+EXPORTS
+	luaopen_htmlua

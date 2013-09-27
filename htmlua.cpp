@@ -1,4 +1,4 @@
-#include "html.h"
+#include "htmlua.h"
 #include "HtmlParser.h"
 #include <stdlib.h>
 #include <string.h>
@@ -399,7 +399,7 @@ static void define_htmlnode(lua_State* L);
 static void define_htmltag(lua_State* L);
 
 extern "C"
-int luaopen_html(lua_State* L) {
+int luaopen_htmlua(lua_State* L) {
 	LuaFunc funcs[] = {
 		{ "newparser", html_newparser },
 		{ "deleteparser", html_deleteparser },
