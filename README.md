@@ -1,95 +1,95 @@
-htmlua
+ï»¿htmlua
 ======
 
 Lua's C module for parsing html text, wrapper of liigo::HtmlParser
 
-LUAµÄHTML½âÎö¿â£¬CÄ£¿é£¬·â×°×ÔC++µÄ¿â [liigo::HtmlParser](https://github.com/liigo/html-parser)¡£
+LUAçš„HTMLè§£æžåº“ï¼ŒCæ¨¡å—ï¼Œå°è£…è‡ªC++çš„åº“ [liigo::HtmlParser](https://github.com/liigo/html-parser)ã€‚
 
-###©–¡¢»ù±¾¸ÅÄî
+###ã€‡ã€åŸºæœ¬æ¦‚å¿µ
 
-±¾HTML½âÎöÆ÷°ÑHTMLÎÄ±¾½âÎöÎªÒ»×éÓÐÐòµÄ½Úµã(Node)¡£¸÷½Úµã·ÖÎª²»Í¬µÄÀàÐÍ£¬¼ÇÂ¼ÁË²»Í¬µÄÐÅÏ¢¡£
-½ÚµãµÄÀàÐÍÓÐ£º¿ªÊ¼±êÇ©£¨Èç&lt;a href="..."&gt;£©¡¢½áÊø±êÇ©£¨Èç&lt;/a&gt;£©¡¢ÎÄ±¾¡¢×¢ÊÍµÈ¡£
-¿ªÊ¼±êÇ©ºÍ½áÊø±êÇ©¶¼ÓÐÒ»¸ö±êÇ©Ãû³Æ£¨tagname£¬ÈçÉÏÀýµÄ"a"£©£¬ÏàÓ¦µÄÓÐÒ»¸ö±êÇ©ÀàÐÍ£¨tagtype£¬ÓÃÕûÊý±êÊ¶±êÇ©£©¡£
-¿ªÊ¼±êÇ©½ÚµãÍùÍùÓÐÒ»ÏµÁÐÊôÐÔ£¨Attributes£¬ÈçÇ°ÀýÖÐµÄ"href"£©¡£
+æœ¬HTMLè§£æžå™¨æŠŠHTMLæ–‡æœ¬è§£æžä¸ºä¸€ç»„æœ‰åºçš„èŠ‚ç‚¹(Node)ã€‚å„èŠ‚ç‚¹åˆ†ä¸ºä¸åŒçš„ç±»åž‹ï¼Œè®°å½•äº†ä¸åŒçš„ä¿¡æ¯ã€‚
+èŠ‚ç‚¹çš„ç±»åž‹æœ‰ï¼šå¼€å§‹æ ‡ç­¾ï¼ˆå¦‚&lt;a href="..."&gt;ï¼‰ã€ç»“æŸæ ‡ç­¾ï¼ˆå¦‚&lt;/a&gt;ï¼‰ã€æ–‡æœ¬ã€æ³¨é‡Šç­‰ã€‚
+å¼€å§‹æ ‡ç­¾å’Œç»“æŸæ ‡ç­¾éƒ½æœ‰ä¸€ä¸ªæ ‡ç­¾åç§°ï¼ˆtagnameï¼Œå¦‚ä¸Šä¾‹çš„"a"ï¼‰ï¼Œç›¸åº”çš„æœ‰ä¸€ä¸ªæ ‡ç­¾ç±»åž‹ï¼ˆtagtypeï¼Œç”¨æ•´æ•°æ ‡è¯†æ ‡ç­¾ï¼‰ã€‚
+å¼€å§‹æ ‡ç­¾èŠ‚ç‚¹å¾€å¾€æœ‰ä¸€ç³»åˆ—å±žæ€§ï¼ˆAttributesï¼Œå¦‚å‰ä¾‹ä¸­çš„"href"ï¼‰ã€‚
 
-±¾ÎÄµÚËÄ½Ú½«×¨ÃÅ½éÉÜ½ÚµãÀàÐÍºÍ±êÇ©ÀàÐÍ¡£¸ü¶àÐÅÏ¢Çë²Î¿¼[ÎÒCSDN²©¿ÍÉÏµÄÎÄÕÂ](http://blog.csdn.net/liigo/article/details/6153829)¡£
+æœ¬æ–‡ç¬¬å››èŠ‚å°†ä¸“é—¨ä»‹ç»èŠ‚ç‚¹ç±»åž‹å’Œæ ‡ç­¾ç±»åž‹ã€‚æ›´å¤šä¿¡æ¯è¯·å‚è€ƒ[æˆ‘CSDNåšå®¢ä¸Šçš„æ–‡ç« ](http://blog.csdn.net/liigo/article/details/6153829)ã€‚
 
-###Ò»¡¢¼ÓÔØhtmlua¿â£¬´´½¨parser½âÎöÆ÷¶ÔÏó
+###ä¸€ã€åŠ è½½htmluaåº“ï¼Œåˆ›å»ºparserè§£æžå™¨å¯¹è±¡
 
 	local html = require "htmlua"
 
-¸Ãhtml¶ÔÏó£¨¿É×ÔÓÉÃüÃû£©ÓÐÒÔÏÂÁ½¸öº¯Êý£º
+è¯¥htmlå¯¹è±¡ï¼ˆå¯è‡ªç”±å‘½åï¼‰æœ‰ä»¥ä¸‹ä¸¤ä¸ªå‡½æ•°ï¼š
 
-	html.newparser(fn1,fn2)   -- ´´½¨½âÎöÆ÷¶ÔÏó£¬Á½²ÎÊý¾ù¿ÉÊ¡ÂÔ£¨Ïê¼ûÏÂÎÄµÚÎå½Ú£©£¬·µ»Øparser
-	html.deleteparser(parser) -- É¾³ý½âÎöÆ÷¶ÔÏó£¬²ÎÊýÎªparser£¬ÎÞ·µ»ØÖµ
+	html.newparser(fn1,fn2)   -- åˆ›å»ºè§£æžå™¨å¯¹è±¡ï¼Œä¸¤å‚æ•°å‡å¯çœç•¥ï¼ˆè¯¦è§ä¸‹æ–‡ç¬¬äº”èŠ‚ï¼‰ï¼Œè¿”å›žparser
+	html.deleteparser(parser) -- åˆ é™¤è§£æžå™¨å¯¹è±¡ï¼Œå‚æ•°ä¸ºparserï¼Œæ— è¿”å›žå€¼
 
-¸Ãhtml¶ÔÏó»¹ÓÐÒ»¸ö×Ô¶¯´´½¨ºÃµÄ parser ³ÉÔ±£¬¿É¹©Ö±½ÓÊ¹ÓÃ£¬ÎÞÐèÏÔÊ½´´½¨ºÍÉ¾³ý¡£
+è¯¥htmlå¯¹è±¡è¿˜æœ‰ä¸€ä¸ªè‡ªåŠ¨åˆ›å»ºå¥½çš„ parser æˆå‘˜ï¼Œå¯ä¾›ç›´æŽ¥ä½¿ç”¨ï¼Œæ— éœ€æ˜¾å¼åˆ›å»ºå’Œåˆ é™¤ã€‚
 
-###¶þ¡¢parser½âÎöÆ÷¶ÔÏó£¬½âÎöHTMLÎÄ±¾
+###äºŒã€parserè§£æžå™¨å¯¹è±¡ï¼Œè§£æžHTMLæ–‡æœ¬
 
-parser½âÎöÆ÷ÓÐÒÔÏÂ·½·¨£¨ÐèÊ×ÏÈ´«Èëparser×ÔÉí×÷ÎªµÚÒ»¸ö²ÎÊý£©£º
+parserè§£æžå™¨æœ‰ä»¥ä¸‹æ–¹æ³•ï¼ˆéœ€é¦–å…ˆä¼ å…¥parserè‡ªèº«ä½œä¸ºç¬¬ä¸€ä¸ªå‚æ•°ï¼‰ï¼š
 
-	parser:parse(html,[parseAttr]) -- ½âÎöHTMLÎÄ±¾£¬²ÎÊý1ÊÇHTMLÎÄ±¾£¬²ÎÊý2Ö¸¶¨ÊÇ·ñ½âÎö½ÚµãÊôÐÔ£¨Ä¬ÈÏÎªtrue£©£¬ÎÞ·µ»ØÖµ
-	parser:nodecount() -- ·µ»Ø½âÎöºóµÄ½Úµã¸öÊý
-	parser:node(index) -- ·µ»Ø½âÎöºóµÄÖ¸¶¨Ë÷Òý´¦µÄ½Úµã¶ÔÏó£¬²ÎÊýÊÇ½ÚµãË÷Òý(>=1,<=nodecount())£¬·µ»ØÖµÊÇnode¶ÔÏó£¨Ë÷Òý·Ç·¨Ê±·µ»Ønil£©
-	parser:ipairs()    -- ÓÃÓÚÖ§³ÖforÑ­»·Ë³Ðò±éÀú½Úµã£¬Èç£ºfor index,node in parser:ipairs() do ...
+	parser:parse(html,[parseAttr]) -- è§£æžHTMLæ–‡æœ¬ï¼Œå‚æ•°1æ˜¯HTMLæ–‡æœ¬ï¼Œå‚æ•°2æŒ‡å®šæ˜¯å¦è§£æžèŠ‚ç‚¹å±žæ€§ï¼ˆé»˜è®¤ä¸ºtrueï¼‰ï¼Œæ— è¿”å›žå€¼
+	parser:nodecount() -- è¿”å›žè§£æžåŽçš„èŠ‚ç‚¹ä¸ªæ•°
+	parser:node(index) -- è¿”å›žè§£æžåŽçš„æŒ‡å®šç´¢å¼•å¤„çš„èŠ‚ç‚¹å¯¹è±¡ï¼Œå‚æ•°æ˜¯èŠ‚ç‚¹ç´¢å¼•(>=1,<=nodecount())ï¼Œè¿”å›žå€¼æ˜¯nodeå¯¹è±¡ï¼ˆç´¢å¼•éžæ³•æ—¶è¿”å›žnilï¼‰
+	parser:ipairs()    -- ç”¨äºŽæ”¯æŒforå¾ªçŽ¯é¡ºåºéåŽ†èŠ‚ç‚¹ï¼Œå¦‚ï¼šfor index,node in parser:ipairs() do ...
 
-½èÖúÓÚ parser:ipairs() ·½·¨£¬¿ÉÒÔÓÃ for Ñ­»·Ë³Ðò±éÀú node ½Úµã¶ÔÏó£º
+å€ŸåŠ©äºŽ parser:ipairs() æ–¹æ³•ï¼Œå¯ä»¥ç”¨ for å¾ªçŽ¯é¡ºåºéåŽ† node èŠ‚ç‚¹å¯¹è±¡ï¼š
 
 	parser:parse("<html><body bg=red id=liigo>xxx<p x=123>...")
 	for index,node in parser:ipairs() do
 		print("node:", index, node.tagname, node.text)
 	end
 
-###Èý¡¢node½Úµã¶ÔÏó£¬»ñÈ¡½ÚµãÐÅÏ¢
+###ä¸‰ã€nodeèŠ‚ç‚¹å¯¹è±¡ï¼ŒèŽ·å–èŠ‚ç‚¹ä¿¡æ¯
 
-node¶ÔÏóÓÐÒÔÏÂ³ÉÔ±£º
+nodeå¯¹è±¡æœ‰ä»¥ä¸‹æˆå‘˜ï¼š
 
-	node.type      -- ½ÚµãÀàÐÍ£¨int£©£¬¿ÉÎª htmlnode.START_TAG, htmlnode.END_TAG... µÈ³£Á¿ÖµÖ®Ò»£¬Ïê¼ûµÚËÄ½Úhtmlnode
-	node.text      -- ½ÚµãÎÄ±¾£¨string£©
-	node.tagname   -- ±êÇ©Ãû³Æ£¨string£©
-	node.tagtype   -- ±êÇ©ÀàÐÍ£¨int£©£¬¿ÉÎª htmltag.A, htmltag.DIV, htmltag.IMG... µÈ³£Á¿ÖµÖ®Ò»£¬Ïê¼ûµÚËÄ½Úhtmltag
-	node.attrcount -- ÊôÐÔ¸öÊý£¨int£©
-	node.iscdata   -- ÊÇ·ñCDATAÇø¿é£¨bool£©
-	node.isselfclosing -- ÊÇ·ñ×Ô½áÊø±êÇ©£¨bool£©£¨ÀýÈç<br/>Îª×Ô½áÊø±êÇ©£©
+	node.type      -- èŠ‚ç‚¹ç±»åž‹ï¼ˆintï¼‰ï¼Œå¯ä¸º htmlnode.START_TAG, htmlnode.END_TAG... ç­‰å¸¸é‡å€¼ä¹‹ä¸€ï¼Œè¯¦è§ç¬¬å››èŠ‚htmlnode
+	node.text      -- èŠ‚ç‚¹æ–‡æœ¬ï¼ˆstringï¼‰
+	node.tagname   -- æ ‡ç­¾åç§°ï¼ˆstringï¼‰
+	node.tagtype   -- æ ‡ç­¾ç±»åž‹ï¼ˆintï¼‰ï¼Œå¯ä¸º htmltag.A, htmltag.DIV, htmltag.IMG... ç­‰å¸¸é‡å€¼ä¹‹ä¸€ï¼Œè¯¦è§ç¬¬å››èŠ‚htmltag
+	node.attrcount -- å±žæ€§ä¸ªæ•°ï¼ˆintï¼‰
+	node.iscdata   -- æ˜¯å¦CDATAåŒºå—ï¼ˆboolï¼‰
+	node.isselfclosing -- æ˜¯å¦è‡ªç»“æŸæ ‡ç­¾ï¼ˆboolï¼‰ï¼ˆä¾‹å¦‚<br/>ä¸ºè‡ªç»“æŸæ ‡ç­¾ï¼‰
 
-node¶ÔÏóÓÐÒÔÏÂ·½·¨£¨ÐèÊ×ÏÈ´«Èënode×ÔÉí×÷ÎªµÚÒ»¸ö²ÎÊý£©£º
+nodeå¯¹è±¡æœ‰ä»¥ä¸‹æ–¹æ³•ï¼ˆéœ€é¦–å…ˆä¼ å…¥nodeè‡ªèº«ä½œä¸ºç¬¬ä¸€ä¸ªå‚æ•°ï¼‰ï¼š
 
-	node:attr(index/name) -- È¡Ö¸¶¨ÊôÐÔÖµ¡£Èç¹û²ÎÊýÊÇÊôÐÔÃû(string)£¬·µ»ØÊôÐÔÖµ(string)£»Èç¹û²ÎÊýÊÇÊôÐÔË÷Òý(>=1,<=attrcount)£¬·µ»ØÊôÐÔÃû(string)ºÍÊôÐÔÖµ(string)£»Èç¹û²ÎÊýÖ¸¶¨µÄÊôÐÔ²»´æÔÚ£¬·µ»ØÁ½¸önil¡£
-	node:pairs()     -- ÓÃÓÚÖ§³ÖforÑ­»·±éÀúÊôÐÔ£¬Èç for name,value in node:pairs() do ...
-	node:parseattr() -- ½âÎö½ÚµãÊôÐÔ£¬ÎÞ²ÎÊýÎÞ·µ»ØÖµ£¬½âÎö½á¹û´æÈënode¶ÔÏóÖÐ¡£Èç¹ûÏÈÇ°ÒÑ¾­½âÎö¹ý£¬²»»áÖØ¸´½âÎö¡£
+	node:attr(index/name) -- å–æŒ‡å®šå±žæ€§å€¼ã€‚å¦‚æžœå‚æ•°æ˜¯å±žæ€§å(string)ï¼Œè¿”å›žå±žæ€§å€¼(string)ï¼›å¦‚æžœå‚æ•°æ˜¯å±žæ€§ç´¢å¼•(>=1,<=attrcount)ï¼Œè¿”å›žå±žæ€§å(string)å’Œå±žæ€§å€¼(string)ï¼›å¦‚æžœå‚æ•°æŒ‡å®šçš„å±žæ€§ä¸å­˜åœ¨ï¼Œè¿”å›žä¸¤ä¸ªnilã€‚
+	node:pairs()     -- ç”¨äºŽæ”¯æŒforå¾ªçŽ¯éåŽ†å±žæ€§ï¼Œå¦‚ for name,value in node:pairs() do ...
+	node:parseattr() -- è§£æžèŠ‚ç‚¹å±žæ€§ï¼Œæ— å‚æ•°æ— è¿”å›žå€¼ï¼Œè§£æžç»“æžœå­˜å…¥nodeå¯¹è±¡ä¸­ã€‚å¦‚æžœå…ˆå‰å·²ç»è§£æžè¿‡ï¼Œä¸ä¼šé‡å¤è§£æžã€‚
 
-½èÖúÓÚ node:pairs() ·½·¨£¬¿ÉÒÔÓÃ for Ñ­»·±éÀú½ÚµãÊôÐÔ£º
+å€ŸåŠ©äºŽ node:pairs() æ–¹æ³•ï¼Œå¯ä»¥ç”¨ for å¾ªçŽ¯éåŽ†èŠ‚ç‚¹å±žæ€§ï¼š
 
 	local node1 = parser:node(1)
 	for name,value in node1:pairs() do
 		print("attr:", name, value)
 	end
 
-×¢Òâ£¬²Ù×÷nodeµÄ¹ý³ÌÖÐÐè±£Ö¤parser¶ÔÏóÊ¼ÖÕÓÐÐ§£¬ÇÒÃ»ÓÐµ÷ÓÃparser:parse()Ö´ÐÐÏÂÒ»´Î½âÎö¡£
+æ³¨æ„ï¼Œæ“ä½œnodeçš„è¿‡ç¨‹ä¸­éœ€ä¿è¯parserå¯¹è±¡å§‹ç»ˆæœ‰æ•ˆï¼Œä¸”æ²¡æœ‰è°ƒç”¨parser:parse()æ‰§è¡Œä¸‹ä¸€æ¬¡è§£æžã€‚
 
-###ËÄ¡¢½ÚµãÀàÐÍºÍ±êÇ©ÀàÐÍ
+###å››ã€èŠ‚ç‚¹ç±»åž‹å’Œæ ‡ç­¾ç±»åž‹
 
-½ÚµãÀàÐÍÓÃÒ»¸öÕûÊýÀ´±íÊ¾£¬±¾¿âÒÑÊÂÏÈ¶¨ÒåÁËÈçÏÂ½ÚµãÀàÐÍ³£Á¿£º
+èŠ‚ç‚¹ç±»åž‹ç”¨ä¸€ä¸ªæ•´æ•°æ¥è¡¨ç¤ºï¼Œæœ¬åº“å·²äº‹å…ˆå®šä¹‰äº†å¦‚ä¸‹èŠ‚ç‚¹ç±»åž‹å¸¸é‡ï¼š
 
 	htmlnode = {
-		START_TAG = 1, --¿ªÊ¼±êÇ©£¬Èç <a href="liigo.com"> »ò <br/>
-		END_TAG   = 2, --½áÊø±êÇ©£¬Èç </a>
-		CONTENT   = 3, --ÄÚÈÝ: ½éÓÚ¿ªÊ¼±êÇ©ºÍ/»ò½áÊø±êÇ©Ö®¼äµÄÆÕÍ¨ÎÄ±¾
-		REMARKS   = 4, --×¢ÊÍ: <!-- -->
-		UNKNOWN   = 5, --Î´ÖªµÄ½ÚµãÀàÐÍ
-		_USER_    = 10, --ÓÃ»§¶¨ÒåµÄÆäËû½ÚµãÀàÐÍÖµÓ¦´óÓÚ_USER_£¬ÒÔÈ·±£²»ÓëÉÏÃæ¶¨ÒåµÄ³£Á¿ÖµÖØ¸´
+		START_TAG = 1, --å¼€å§‹æ ‡ç­¾ï¼Œå¦‚ <a href="liigo.com"> æˆ– <br/>
+		END_TAG   = 2, --ç»“æŸæ ‡ç­¾ï¼Œå¦‚ </a>
+		CONTENT   = 3, --å†…å®¹: ä»‹äºŽå¼€å§‹æ ‡ç­¾å’Œ/æˆ–ç»“æŸæ ‡ç­¾ä¹‹é—´çš„æ™®é€šæ–‡æœ¬
+		REMARKS   = 4, --æ³¨é‡Š: <!-- -->
+		UNKNOWN   = 5, --æœªçŸ¥çš„èŠ‚ç‚¹ç±»åž‹
+		_USER_    = 10, --ç”¨æˆ·å®šä¹‰çš„å…¶ä»–èŠ‚ç‚¹ç±»åž‹å€¼åº”å¤§äºŽ_USER_ï¼Œä»¥ç¡®ä¿ä¸ä¸Žä¸Šé¢å®šä¹‰çš„å¸¸é‡å€¼é‡å¤
 	}
 
-Ê¹ÓÃ·½·¨£º if(nodetype == htmlnode.START_TAG) ...
+ä½¿ç”¨æ–¹æ³•ï¼š if(nodetype == htmlnode.START_TAG) ...
 
-±êÇ©ÀàÐÍÒ²ÓÃÒ»¸öÕûÊýÀ´±íÊ¾£¬±¾¿âÒÑÊÂÏÈ¶¨ÒåÁËÈçÏÂ±êÇ©ÀàÐÍ³£Á¿£º
+æ ‡ç­¾ç±»åž‹ä¹Ÿç”¨ä¸€ä¸ªæ•´æ•°æ¥è¡¨ç¤ºï¼Œæœ¬åº“å·²äº‹å…ˆå®šä¹‰äº†å¦‚ä¸‹æ ‡ç­¾ç±»åž‹å¸¸é‡ï¼š
 
 	htmltag = {
-		UNKNOWN = 0, --±íÊ¾Î´¾­Ê¶±ðµÄ±êÇ©ÀàÐÍ£¬²Î¼ûHtmlParser.onIdentifyHtmlTag()
-		SCRIPT=1, STYLE=2, TEXTAREA=3, --³öÓÚ½âÎöÐèÒª±ØÐëÊ¶±ð<script>,<style>ºÍ<textarea>£¬ÄÚ²¿ÌØ±ð´¦Àí
-		--ÒÔÏÂ°´±êÇ©×ÖÄ¸Ë³ÐòÅÅÁÐ, À´Ô´£ºhttp://www.w3.org/TR/html4/index/elements.html (HTML4)
-		--»¹ÓÐ http://www.w3.org/TR/html5/section-index.html#elements-1 (HTML5)
+		UNKNOWN = 0, --è¡¨ç¤ºæœªç»è¯†åˆ«çš„æ ‡ç­¾ç±»åž‹ï¼Œå‚è§HtmlParser.onIdentifyHtmlTag()
+		SCRIPT=1, STYLE=2, TEXTAREA=3, --å‡ºäºŽè§£æžéœ€è¦å¿…é¡»è¯†åˆ«<script>,<style>å’Œ<textarea>ï¼Œå†…éƒ¨ç‰¹åˆ«å¤„ç†
+		--ä»¥ä¸‹æŒ‰æ ‡ç­¾å­—æ¯é¡ºåºæŽ’åˆ—, æ¥æºï¼šhttp://www.w3.org/TR/html4/index/elements.html (HTML4)
+		--è¿˜æœ‰ http://www.w3.org/TR/html5/section-index.html#elements-1 (HTML5)
 		A=11, ABBR=12, ACRONYM=13, ADDRESS=14, APPLET=15, AREA=16, ARTICLE=17, ASIDE=18, AUDIO=19,
 		B=20, BASE=21, BASEFONT=22, BDI=23, BDO=24, BIG=25, BLOCKQUOTE=26, BODY=27, BR=28, BUTTON=29,
 		CAPTION=30, CENTER=31, CITE=32, CODE=33, COL=34, COLGROUP=35, COMMAND=36,
@@ -102,23 +102,23 @@ node¶ÔÏóÓÐÒÔÏÂ·½·¨£¨ÐèÊ×ÏÈ´«Èënode×ÔÉí×÷ÎªµÚÒ»¸ö²ÎÊý£©£º
 		S=99, SAMP=100, SECTION=101, SELECT=102, SMALL=103, SOURCE=104, SPAN=105, STRIKE=106, STRONG=107, SUB=108, SUMMARY=109, SUP=110,
 		TABLE=111, TBODY=112, TD=113, TFOOT=114, TH=115, THEAD=116, TIME=117, TITLE=118, TR=119, TRACK=120, TT=121,
 		U=122, UL=123, VAR=124, VIDEO=125, WBR=126,
-		_USER_=150, --ÓÃ»§¶¨ÒåµÄÆäËû±êÇ©ÀàÐÍÖµÓ¦´óÓÚ_USER_£¬ÒÔÈ·±£²»ÓëÉÏÃæ¶¨ÒåµÄ³£Á¿ÖµÖØ¸´
+		_USER_=150, --ç”¨æˆ·å®šä¹‰çš„å…¶ä»–æ ‡ç­¾ç±»åž‹å€¼åº”å¤§äºŽ_USER_ï¼Œä»¥ç¡®ä¿ä¸ä¸Žä¸Šé¢å®šä¹‰çš„å¸¸é‡å€¼é‡å¤
 	}
 
-Ê¹ÓÃ·½·¨£º if(tagtype == htmltag.DIV) ...
+ä½¿ç”¨æ–¹æ³•ï¼š if(tagtype == htmltag.DIV) ...
 
-###Îå¡¢parser½âÎöÆ÷µÄ»Øµ÷º¯Êý
+###äº”ã€parserè§£æžå™¨çš„å›žè°ƒå‡½æ•°
 
-º¯Êý html.newparser([fnOnParseAttr],[fnOnNodeReady]) ÓÐÁ½¸ö¿ÉÊ¡ÂÔµÄ²ÎÊý£¬¿É½ÓÊÕÁ½¸öº¯Êý×÷Îª»Øµ÷º¯Êý£¬ËüÃÇÔÚ½âÎö¹ý³ÌÖÐ±»¶à´Îµ÷ÓÃ£¬ÆäÔ­ÐÍÈçÏÂ£º
+å‡½æ•° html.newparser([fnOnParseAttr],[fnOnNodeReady]) æœ‰ä¸¤ä¸ªå¯çœç•¥çš„å‚æ•°ï¼Œå¯æŽ¥æ”¶ä¸¤ä¸ªå‡½æ•°ä½œä¸ºå›žè°ƒå‡½æ•°ï¼Œå®ƒä»¬åœ¨è§£æžè¿‡ç¨‹ä¸­è¢«å¤šæ¬¡è°ƒç”¨ï¼Œå…¶åŽŸåž‹å¦‚ä¸‹ï¼š
 
 	function fnOnParseAttr(node) bool
 	function fnOnNodeReady(node) bool
 
-»Øµ÷º¯Êý fnOnParseAttr ÔÚ½âÎöµ½¿ªÊ¼±êÇ©ÇÒÐèÒª½âÎöÊôÐÔÊ±±»µ÷ÓÃ¡£²ÎÊýÊÇµ±Ç°½Úµã¶ÔÏónode£¬·µ»ØÖµÀàÐÍÊÇbool¡£·µ»Øtrue±íÊ¾ÐèÒª½âÎöÊôÐÔ£¬·µ»Øfalse±íÊ¾²»ÐèÒª¡£Èç¹û´Ë²ÎÊý±»Ê¡ÂÔ»òÎªnil£¬µÈ¼ÛÓÚ·µ»Øtrue¡£parser:parse()²ÎÊýparseAttrÎªfalseµÄÇé¿öÏÂ²»»áµ÷ÓÃ´Ë»Øµ÷º¯Êý¡£
+å›žè°ƒå‡½æ•° fnOnParseAttr åœ¨è§£æžåˆ°å¼€å§‹æ ‡ç­¾ä¸”éœ€è¦è§£æžå±žæ€§æ—¶è¢«è°ƒç”¨ã€‚å‚æ•°æ˜¯å½“å‰èŠ‚ç‚¹å¯¹è±¡nodeï¼Œè¿”å›žå€¼ç±»åž‹æ˜¯boolã€‚è¿”å›žtrueè¡¨ç¤ºéœ€è¦è§£æžå±žæ€§ï¼Œè¿”å›žfalseè¡¨ç¤ºä¸éœ€è¦ã€‚å¦‚æžœæ­¤å‚æ•°è¢«çœç•¥æˆ–ä¸ºnilï¼Œç­‰ä»·äºŽè¿”å›žtrueã€‚parser:parse()å‚æ•°parseAtträ¸ºfalseçš„æƒ…å†µä¸‹ä¸ä¼šè°ƒç”¨æ­¤å›žè°ƒå‡½æ•°ã€‚
 
-»Øµ÷º¯Êý fnOnNodeReady ÔÚ½âÎöÍê³ÉÃ¿¸ö½Úµãºó±»µ÷ÓÃ£¬ÓÃ»§¿ÉÔÚ´ËÈ·¶¨ÊÇ·ñ¼ÌÐø½âÎöºóÐø½Úµã¡£²ÎÊýÊÇµ±Ç°½Úµã¶ÔÏónode£¬·µ»ØÖµÀàÐÍÊÇbool¡£·µ»Øtrue±íÊ¾¼ÌÐø½âÎö£¬·µ»Øfalse±íÊ¾ÖÕÖ¹½âÎö¡£Èç¹û´Ë²ÎÊý±»Ê¡ÂÔ»òÎªnil£¬µÈ¼ÛÓÚ·µ»Øtrue¡£
+å›žè°ƒå‡½æ•° fnOnNodeReady åœ¨è§£æžå®Œæˆæ¯ä¸ªèŠ‚ç‚¹åŽè¢«è°ƒç”¨ï¼Œç”¨æˆ·å¯åœ¨æ­¤ç¡®å®šæ˜¯å¦ç»§ç»­è§£æžåŽç»­èŠ‚ç‚¹ã€‚å‚æ•°æ˜¯å½“å‰èŠ‚ç‚¹å¯¹è±¡nodeï¼Œè¿”å›žå€¼ç±»åž‹æ˜¯boolã€‚è¿”å›žtrueè¡¨ç¤ºç»§ç»­è§£æžï¼Œè¿”å›žfalseè¡¨ç¤ºç»ˆæ­¢è§£æžã€‚å¦‚æžœæ­¤å‚æ•°è¢«çœç•¥æˆ–ä¸ºnilï¼Œç­‰ä»·äºŽè¿”å›žtrueã€‚
 
-±¾¿âµÄ²âÊÔÀý³Ì test.lua ÖÐÓÐÊ¹ÓÃÕâÁ½¸ö»Øµ÷º¯ÊýµÄÊ¾Àý£¬»ù±¾´úÂëÈçÏÂ£º
+æœ¬åº“çš„æµ‹è¯•ä¾‹ç¨‹ test.lua ä¸­æœ‰ä½¿ç”¨è¿™ä¸¤ä¸ªå›žè°ƒå‡½æ•°çš„ç¤ºä¾‹ï¼ŒåŸºæœ¬ä»£ç å¦‚ä¸‹ï¼š
 
 	local function onParseAttr(node)
 		print("onParseAttr:", node.tagname, node.text)
